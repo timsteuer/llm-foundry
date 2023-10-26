@@ -12,9 +12,9 @@ import pandas as pd
 import torch
 from composer.loggers.logger_destination import LoggerDestination
 from composer.models.base import ComposerModel
+from composer.profiler import Profiler
 from composer.trainer import Trainer
 from composer.utils import dist, get_device, reproducibility
-from composer.profiler import Profiler
 from omegaconf import DictConfig, ListConfig
 from omegaconf import OmegaConf as om
 from transformers import (AutoModelForCausalLM, PreTrainedTokenizerBase,
@@ -24,7 +24,8 @@ from llmfoundry.models import MPTForCausalLM
 from llmfoundry.models.model_registry import COMPOSER_MODEL_REGISTRY
 from llmfoundry.utils.builders import (build_icl_data_and_gauntlet,
                                        build_logger, build_tokenizer)
-from llmfoundry.utils.config_utils import pop_config, pop_profiler_from_config, process_init_device
+from llmfoundry.utils.config_utils import (pop_config, pop_profiler_from_config,
+                                           process_init_device)
 
 
 def load_peft_model(model_cfg: DictConfig, tokenizer: PreTrainedTokenizerBase,
@@ -92,24 +93,15 @@ def load_model(model_cfg: DictConfig, tokenizer: PreTrainedTokenizerBase,
                     )
 
 
-def evaluate_model(
-    model_cfg: DictConfig,
-    dist_timeout: Union[float, int],
-    run_name: str,
-    seed: int,
-    icl_tasks: Union[str, ListConfig],
-    max_seq_len: int,
-    device_eval_batch_size: int,
-    eval_gauntlet_config: Optional[Union[str, DictConfig]],
-    fsdp_config: Optional[Dict],
-    num_retries: int,
-    loggers_cfg: Dict[str, Any],
-    python_log_level: Optional[str],
-    precision: str,
-    eval_gauntlet_df: Optional[pd.DataFrame],
-    icl_subset_num_batches: Optional[int],
-    profiler: Optional[Profiler]
-):
+def evaluate_model(model_cfg: DictConfig, dist_timeout: Union[float, int],
+                   run_name: str, seed: int, icl_tasks: Union[str, ListConfig],
+                   max_seq_len: int, device_eval_batch_size: int,
+                   eval_gauntlet_config: Optional[Union[str, DictConfig]],
+                   fsdp_config: Optional[Dict], num_retries: int,
+                   loggers_cfg: Dict[str, Any], python_log_level: Optional[str],
+                   precision: str, eval_gauntlet_df: Optional[pd.DataFrame],
+                   icl_subset_num_batches: Optional[int],
+                   profiler: Optional[Profiler]):
 
     print(f'Evaluating model: {model_cfg.model_name}', flush=True)
     # Build tokenizer and model

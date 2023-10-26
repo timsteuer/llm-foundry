@@ -5,11 +5,11 @@ import contextlib
 import logging
 import math
 import warnings
-from typing import Any, List, Dict, Literal, Mapping, Optional, Tuple, Union
+from typing import Any, Dict, List, Literal, Mapping, Optional, Tuple, Union
 
-from composer.utils import dist
 from composer.profiler import (JSONTraceHandler, Profiler, TraceHandler,
                                cyclic_schedule)
+from composer.utils import dist
 from omegaconf import DictConfig, ListConfig
 from omegaconf import OmegaConf as om
 
@@ -169,9 +169,10 @@ def log_config(cfg: DictConfig) -> None:
 
 
 def pop_profiler_from_config(cfg: DictConfig):
-    """Pops the composer profiler from the config and returns it. 
-    
-    Returns None if no profiler is specified in the config."""
+    """Pops the composer profiler from the config and returns it.
+
+    Returns None if no profiler is specified in the config.
+    """
     profiler: Optional[Profiler] = None
     profiler_cfg: Optional[DictConfig] = pop_config(cfg,
                                                     'profiler',
@@ -198,4 +199,3 @@ def pop_profiler_from_config(cfg: DictConfig):
                             trace_handlers=profiler_trace_handlers,
                             schedule=profiler_schedule)
     return profiler
-    

@@ -86,11 +86,11 @@ device_train_microbatch_size: 16
 precision: fp32
 
 profiler: # profiles 60% of the time
-  schedule: # in batches 
+  schedule: # in batches
     wait: 1
     active: 3
     warmup: 1
-    repeat: 0  # run this cycle till epoch ends 
+    repeat: 0  # run this cycle till epoch ends
     skip_first: 0
   torch_prof_folder: '{run_name}/torch_traces' # stores files in /llm-foundry/scripts/{run_name}/torch_traces/
   torch_prof_filename: 'torch-profile-ep{epoch}-ba{batch}-rank{rank}.pt.trace.json'
@@ -102,7 +102,7 @@ profiler: # profiles 60% of the time
   torch_prof_profile_memory: true
   torch_prof_remote_file_name: 's3://mosaicml-internal-checkpoints-shared/chuck/{run_name}/torch_traces/torch-profile-ep{epoch}-ba{batch}-rank{rank}.pt.trace.json' # TODO: (change me)
   torch_prof_num_traces_to_keep: 1 # -1 means keep all traces on disk at risk of OOM
-  # turn off all system profiling 
+  # turn off all system profiling
   sys_prof_cpu: false
   sys_prof_net: false
   sys_prof_disk: false

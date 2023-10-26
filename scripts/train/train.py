@@ -30,7 +30,8 @@ from llmfoundry.utils.builders import (build_algorithm, build_callback,
                                        build_logger, build_optimizer,
                                        build_scheduler, build_tokenizer)
 from llmfoundry.utils.config_utils import (log_config, pop_config,
-                                           process_init_device, pop_profiler_from_config,
+                                           pop_profiler_from_config,
+                                           process_init_device,
                                            update_batch_size_info)
 
 
