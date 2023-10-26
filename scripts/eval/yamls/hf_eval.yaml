@@ -1,6 +1,7 @@
 max_seq_len: 1024
 seed: 1
 precision: fp32
+init_device: mixed
 
 # If you are using one model, put it here:
 model_name_or_path: EleutherAI/gpt-neo-125m
@@ -12,7 +13,7 @@ models:
   model:
     name: hf_causal_lm
     pretrained_model_name_or_path: ${model_name_or_path}
-    init_device: mixed
+    init_device: ${init_device}
     pretrained: true
   tokenizer:
     name: ${model_name_or_path}

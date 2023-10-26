@@ -14,6 +14,7 @@ from composer.loggers.logger_destination import LoggerDestination
 from composer.models.base import ComposerModel
 from composer.trainer import Trainer
 from composer.utils import dist, get_device, reproducibility
+from composer.profiler import Profiler
 from omegaconf import DictConfig, ListConfig
 from omegaconf import OmegaConf as om
 from transformers import (AutoModelForCausalLM, PreTrainedTokenizerBase,
@@ -23,7 +24,7 @@ from llmfoundry.models import MPTForCausalLM
 from llmfoundry.models.model_registry import COMPOSER_MODEL_REGISTRY
 from llmfoundry.utils.builders import (build_icl_data_and_gauntlet,
                                        build_logger, build_tokenizer)
-from llmfoundry.utils.config_utils import pop_config, process_init_device
+from llmfoundry.utils.config_utils import pop_config, pop_profiler_from_config, process_init_device
 
 
 def load_peft_model(model_cfg: DictConfig, tokenizer: PreTrainedTokenizerBase,
@@ -107,6 +108,7 @@ def evaluate_model(
     precision: str,
     eval_gauntlet_df: Optional[pd.DataFrame],
     icl_subset_num_batches: Optional[int],
+    profiler: Optional[Profiler]
 ):
 
     print(f'Evaluating model: {model_cfg.model_name}', flush=True)
@@ -172,6 +174,7 @@ def evaluate_model(
         log_to_console=True,
         dist_timeout=dist_timeout,
         python_log_level=python_log_level,
+        profiler=profiler,
     )
 
     if torch.cuda.is_available():
@@ -249,6 +252,7 @@ def main(cfg: DictConfig):
                                              'icl_subset_num_batches',
                                              must_exist=False,
                                              default_value=None)
+    profiler: Optional[Profiler] = pop_profiler_from_config(cfg)
     # Pop out interpolation variables.
     pop_config(cfg, 'model_name_or_path', must_exist=False, default_value=None)
 
@@ -290,7 +294,8 @@ def main(cfg: DictConfig):
              python_log_level=python_log_level,
              precision=precision,
              eval_gauntlet_df=eval_gauntlet_df,
-             icl_subset_num_batches=icl_subset_num_batches)
+             icl_subset_num_batches=icl_subset_num_batches,
+             profiler=profiler)
 
         if eval_gauntlet_callback is not None:
             composite_scores = eval_gauntlet_callback.eval_after_all(

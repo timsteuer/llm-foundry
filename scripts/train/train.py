@@ -16,8 +16,6 @@ from composer.core.callback import Callback
 from composer.loggers import MosaicMLLogger
 from composer.loggers.mosaicml_logger import (MOSAICML_ACCESS_TOKEN_ENV_VAR,
                                               MOSAICML_PLATFORM_ENV_VAR)
-from composer.profiler import (JSONTraceHandler, Profiler, TraceHandler,
-                               cyclic_schedule)
 from composer.utils import dist, get_device, reproducibility
 from omegaconf import DictConfig, ListConfig
 from omegaconf import OmegaConf as om
@@ -32,7 +30,7 @@ from llmfoundry.utils.builders import (build_algorithm, build_callback,
                                        build_logger, build_optimizer,
                                        build_scheduler, build_tokenizer)
 from llmfoundry.utils.config_utils import (log_config, pop_config,
-                                           process_init_device,
+                                           process_init_device, pop_profiler_from_config,
                                            update_batch_size_info)
 
 
@@ -486,31 +484,7 @@ def main(cfg: DictConfig) -> Trainer:
             loggers.append(mosaicml_logger)
 
     # Profiling
-    profiler: Optional[Profiler] = None
-    profiler_cfg: Optional[DictConfig] = pop_config(cfg,
-                                                    'profiler',
-                                                    must_exist=False,
-                                                    convert=False,
-                                                    default_value=None)
-    if profiler_cfg:
-        profiler_schedule_cfg: Dict = pop_config(profiler_cfg,
-                                                 'schedule',
-                                                 must_exist=True,
-                                                 convert=True)
-        profiler_schedule = cyclic_schedule(**profiler_schedule_cfg)
-        # Only support json trace handler
-        profiler_trace_handlers: List[TraceHandler] = []
-        profiler_trace_cfg: Optional[Dict] = pop_config(profiler_cfg,
-                                                        'json_trace_handler',
-                                                        must_exist=False,
-                                                        default_value=None,
-                                                        convert=True)
-        if profiler_trace_cfg:
-            profiler_trace_handlers.append(
-                JSONTraceHandler(**profiler_trace_cfg))
-        profiler = Profiler(**profiler_cfg,
-                            trace_handlers=profiler_trace_handlers,
-                            schedule=profiler_schedule)
+    profiler = pop_profiler_from_config(cfg)
 
     # Callbacks
     callbacks: List[Callback] = [
