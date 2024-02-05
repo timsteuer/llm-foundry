@@ -28,7 +28,6 @@ from composer.utils import dist
 from omegaconf import DictConfig, ListConfig
 from omegaconf import OmegaConf as om
 from torch.optim.optimizer import Optimizer
-from torchmetrics import Metric
 from transformers import AutoTokenizer, PreTrainedTokenizerBase
 
 from llmfoundry.callbacks import (AsyncEval, EvalGauntlet, FDiffMetrics,
@@ -108,9 +107,8 @@ def build_eval_loaders(
 
 def add_metrics_to_eval_loaders(
     evaluators: List[Evaluator],
-    metrics: Dict[str, Metric],
+    metric_names: List[str],
 ) -> List[Evaluator]:
-    metric_names = list(metrics.keys())
     eval_loaders, other_evaluators = [], []
     for evaluator in evaluators:
         if evaluator.metric_names == []:
@@ -407,6 +405,10 @@ def build_tokenizer(
             'model_max_length',
             int(1e30),
         )
+
+    if not hasattr(tokenizer, 'eos_token') or tokenizer.eos_token is None:
+        raise ValueError(
+            f'The tokenizer {tokenizer_name} must have an eos_token.')
 
     if dist.is_available() and dist.is_initialized(
     ) and dist.get_world_size() > 1:

@@ -35,6 +35,7 @@ import importlib
 import logging
 import os
 import warnings
+from functools import partial
 from pathlib import Path
 from typing import (Any, Callable, Dict, List, Literal, Optional, Tuple, Union,
                     cast, Sequence)
@@ -43,6 +44,7 @@ from functools import partial
 
 import datasets as hf_datasets
 import huggingface_hub as hf_hub
+import numpy as np
 from composer.utils import dist
 from streaming import StreamingDataset, Stream
 from transformers import PreTrainedTokenizerBase
@@ -230,14 +232,24 @@ def _tokenize_formatted_example(
         raise ValueError(f'Unknown conversation type {example_format=}')
 
 
+<<<<<<< HEAD
 def _filter_long_or_empty_examples(pad_token_id: int, max_seq_len: int, example: Dict) -> bool:
+=======
+def _filter_long_or_empty_examples(pad_token_id: int, max_seq_len: int,
+                                   example: Dict) -> bool:
+>>>>>>> add_finetuning_example_2
     less_than_max_seq_len = len(example['input_ids']) < max_seq_len
     non_empty_input = len(example['input_ids']) > 0
     non_empty_labels = len(example['labels']) > 0
     non_padding_response = any(
         token_id != pad_token_id for token_id in example['labels'])
+<<<<<<< HEAD
     return (less_than_max_seq_len and non_empty_input and
             non_empty_labels and non_padding_response)
+=======
+    return (less_than_max_seq_len and non_empty_input and non_empty_labels and
+            non_padding_response)
+>>>>>>> add_finetuning_example_2
 
 
 class StreamingFinetuningDataset(StreamingDataset):
@@ -367,25 +379,19 @@ class StreamingFinetuningDataset(StreamingDataset):
         )
 
         self.tokenizer = tokenizer
-        self.max_seq_len = 2048
-        self.cnt = 0
+        self.max_seq_len = max_seq_len
 
     # How to process a sample
     def __getitem__(self, idx: int) -> Dict[str, Any]:
         idx = 1545
         sample = super().__getitem__(idx)
-        if "input_ids" in sample:
+        if 'input_ids' in sample:
             # already tokenized data
-            sample["input_ids"] = np.frombuffer(sample["input_ids"], dtype=np.int64)[:self.max_seq_len].tolist().copy()
-            sample["labels"] = np.frombuffer(sample["labels"], dtype=np.int64).tolist().copy()
-            input_ids_max = max(sample["input_ids"])
-            label_max = max(sample["labels"])
-
-            if input_ids_max > 50256:
-                raise RuntimeError(f"bigning debug max input ids: {input_ids_max}")
-            if label_max > 50256:
-                raise RuntimeError(f"bigning debug max label ids: {label_max}, {self.cnt}, {idx}")
-            self.cnt += 1
+            sample['input_ids'] = np.frombuffer(
+                sample['input_ids'],
+                dtype=np.int64)[:self.max_seq_len].tolist().copy()
+            sample['labels'] = np.frombuffer(sample['labels'],
+                                             dtype=np.int64).tolist().copy()
             return sample
         return _tokenize_formatted_example(sample, tokenizer=self.tokenizer)
 
@@ -608,7 +614,12 @@ class DatasetConstructor:
             pad_token_id = tokenizer.pad_token_id
 
             filtered_dataset = tokenized_dataset.filter(
+<<<<<<< HEAD
                 partial(_filter_long_or_empty_examples, pad_token_id, max_seq_len),
+=======
+                partial(_filter_long_or_empty_examples, pad_token_id,
+                        max_seq_len),
+>>>>>>> add_finetuning_example_2
                 num_proc=num_cpus_to_use,
                 desc='Filtering out long prompts',
             )

@@ -1,8 +1,10 @@
 # Copyright 2022 MosaicML LLM Foundry authors
 # SPDX-License-Identifier: Apache-2.0
 
+import json
 import os
 import platform
+import warnings
 from argparse import ArgumentParser, Namespace
 from typing import Dict, Iterable, List, Optional, Union
 import warnings
@@ -15,9 +17,9 @@ from streaming import MDSWriter
 from torch.utils.data import DataLoader, IterableDataset
 from tqdm import tqdm
 
-from llmfoundry.data.finetuning.tasks import (dataset_constructor,
+from llmfoundry.data.finetuning.tasks import (_filter_long_or_empty_examples,
                                               _tokenize_formatted_example,
-                                              _filter_long_or_empty_examples)
+                                              dataset_constructor)
 from llmfoundry.utils.builders import build_tokenizer
 
 
@@ -90,6 +92,11 @@ def parse_args() -> Namespace:
         parsed.tokenizer_kwargs = json.loads(parsed.tokenizer_kwargs)
     else:
         parsed.tokenizer_kwargs = {} 
+
+    if parsed.tokenizer_kwargs is not None:
+        parsed.tokenizer_kwargs = json.loads(parsed.tokenizer_kwargs)
+    else:
+        parsed.tokenizer_kwargs = {}
 
     return parsed
 
@@ -189,7 +196,11 @@ def main(args: Namespace) -> None:
             )
 
     tokenizer = None
+<<<<<<< HEAD
     args.tokenizer_kwargs.update({"model_max_length": args.max_seq_len})
+=======
+    args.tokenizer_kwargs.update({'model_max_length': args.max_seq_len})
+>>>>>>> add_finetuning_example_2
     if args.tokenizer:
         tokenizer = build_tokenizer(args.tokenizer, args.tokenizer_kwargs)
         columns = {'input_ids': 'bytes', 'labels': 'bytes'}
@@ -235,8 +246,10 @@ def main(args: Namespace) -> None:
                         f'from {formatted_sample=}.'
                     )
                 if tokenizer is not None:
-                    sample = _tokenize_formatted_example(sample, tokenizer=tokenizer)
-                    if not _filter_long_or_empty_examples(tokenizer.pad_token_id, args.max_seq_len, sample):
+                    sample = _tokenize_formatted_example(sample,
+                                                         tokenizer=tokenizer)
+                    if not _filter_long_or_empty_examples(
+                            tokenizer.pad_token_id, args.max_seq_len, sample):
                         examples_removed += 1
                         continue
 
