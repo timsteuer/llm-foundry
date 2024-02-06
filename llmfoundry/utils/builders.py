@@ -169,6 +169,9 @@ def build_optimizer(model: torch.nn.Module, name: str,
     elif name == 'decoupled_lionw_8b':
         return DecoupledLionW_8bit(model.parameters(), **optimizer_config)
     elif name == 'adafactor':
+        # if we have relative_step not set, we set it to False
+        if 'relative_step' not in optimizer_config:
+            optimizer_config['relative_step'] = False
         return Adafactor(model.parameters(), **optimizer_config)
     else:
         raise ValueError(f'Not sure how to build optimizer: {name}')
