@@ -35,6 +35,7 @@ from llmfoundry.optim import (DecoupledAdaLRLion, DecoupledClipLion,
                               DecoupledLionW, DecoupledLionW_8bit)
 from llmfoundry.optim.scheduler import InverseSquareRootWithWarmupScheduler
 from llmfoundry.tokenizers.tiktoken import TiktokenTokenizerWrapper
+from torch_optimizer import Adafactor
 
 log = logging.getLogger(__name__)
 
@@ -167,6 +168,8 @@ def build_optimizer(model: torch.nn.Module, name: str,
         return DecoupledAdaLRLion(model.parameters(), **optimizer_config)
     elif name == 'decoupled_lionw_8b':
         return DecoupledLionW_8bit(model.parameters(), **optimizer_config)
+    elif name == 'adafactor':
+        return Adafactor(model.parameters(), **optimizer_config)
     else:
         raise ValueError(f'Not sure how to build optimizer: {name}')
 
