@@ -35,7 +35,7 @@ from llmfoundry.optim import (DecoupledAdaLRLion, DecoupledClipLion,
                               DecoupledLionW, DecoupledLionW_8bit)
 from llmfoundry.optim.scheduler import InverseSquareRootWithWarmupScheduler
 from llmfoundry.tokenizers.tiktoken import TiktokenTokenizerWrapper
-from torch_optimizer import Adafactor
+from transformers import Adafactor
 
 log = logging.getLogger(__name__)
 
